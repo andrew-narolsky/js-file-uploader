@@ -5,6 +5,17 @@ const FileLoader = function (options) {
     this.removeImage();
 }
 
+FileLoader.prototype.isValidFileSize = function (fileSize, $el) {
+    const size = 1024 * 1024 * 2;
+    if (size < fileSize) {
+        $el.querySelector('.error').innerText = 'Make sure your total file size for upload is not over 2MB.'
+        return false;
+    } else {
+        $el.querySelector('.error').innerText = '';
+        return true;
+    }
+}
+
 FileLoader.prototype.isValidMimetype = function (ext, $el) {
     const mimetypes = ['image/jpeg', 'image/png', 'image/gif', 'image/pjpeg', 'image/svg+xml', 'image/webp', 'image/tiff'];
     if (!mimetypes.includes(ext)) {
@@ -30,17 +41,20 @@ FileLoader.prototype.init = function () {
 FileLoader.prototype.drop = function (e) {
     e.preventDefault();
     let file = e.dataTransfer.files[0];
-    let res = FileLoader.prototype.isValidMimetype(file.type, this.closest('.file-uploader'));
-    if (res) {
-        this.innerText = file.type + ' - ' + file.size / 1000 + ' KB';
-        let $image = this.closest('.file-uploader').querySelector('.image');
-        let reader = new FileReader();
-        reader.onloadend = function() {
-            $image.style.backgroundImage = 'url(' + reader.result + ')';
-        }
-        reader.readAsDataURL(file);
-    }
     this.style.borderColor = '#ced4da';
+    if (FileLoader.prototype.isValidFileSize(file.size, this.closest('.file-uploader'))) {
+        return false;
+    }
+    if (!FileLoader.prototype.isValidMimetype(file.type, this.closest('.file-uploader'))) {
+        return false;
+    }
+    this.innerText = file.type + ' - ' + file.size / 1000 + ' KB';
+    let $image = this.closest('.file-uploader').querySelector('.image');
+    let reader = new FileReader();
+    reader.onloadend = function() {
+        $image.style.backgroundImage = 'url(' + reader.result + ')';
+    }
+    reader.readAsDataURL(file);
 }
 
 FileLoader.prototype.dragover = function (e) {
@@ -77,15 +91,18 @@ FileLoader.prototype.uploadImage = function () {
             let $input = $wrap.querySelector('input');
             $input.addEventListener('change', function () {
                 let file = this.files[0];
-                let res = FileLoader.prototype.isValidMimetype(file.type, $wrap);
-                if (res) {
-                    $button.innerText = file.type + ' - ' + file.size / 1000 + ' KB';
-                    let reader = new FileReader();
-                    reader.onloadend = function() {
-                        $image.style.backgroundImage = 'url(' + reader.result + ')';
-                    }
-                    reader.readAsDataURL(file);
+                if (!FileLoader.prototype.isValidFileSize(file.size, $wrap)) {
+                    return false;
                 }
+                if (!FileLoader.prototype.isValidMimetype(file.type, $wrap)) {
+                    return false;
+                }
+                $button.innerText = file.type + ' - ' + file.size / 1000 + ' KB';
+                let reader = new FileReader();
+                reader.onloadend = function() {
+                    $image.style.backgroundImage = 'url(' + reader.result + ')';
+                }
+                reader.readAsDataURL(file);
             });
         }
     }
