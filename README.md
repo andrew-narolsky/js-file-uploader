@@ -1,6 +1,6 @@
-# JS modal
+# JS file uploader
 
-Init modal
+Init file uploader
 ```
 new FileLoader({
     selectors: '.file-uploader'
