@@ -5,32 +5,13 @@ const FileLoader = function (options) {
     this.removeImage();
 }
 
-FileLoader.prototype.isValidFileSize = function (fileSize, $el) {
-    const size = 1024 * 1024 * 2;
-    if (size < fileSize) {
-        $el.querySelector('.error').innerText = 'Make sure your total file size for upload is not over 2MB.'
-        return false;
-    } else {
-        $el.querySelector('.error').innerText = '';
-        return true;
-    }
-}
-
-FileLoader.prototype.isValidMimetype = function (ext, $el) {
-    const mimetypes = ['image/jpeg', 'image/png', 'image/gif', 'image/pjpeg', 'image/svg+xml', 'image/webp', 'image/tiff'];
-    if (!mimetypes.includes(ext)) {
-        $el.querySelector('.error').innerText = 'You tried to upload not supported format. Available formats: jpg, png, jpeg, gif, svg, webp. Bad format.!'
-        return false;
-    } else {
-        $el.querySelector('.error').innerText = '';
-        return true;
-    }
-}
-
 FileLoader.prototype.init = function () {
     for (let i in this.selectors) {
         if (this.selectors.hasOwnProperty(i)) {
-            let $dropArea = this.selectors[i];
+            this.selectors[i].insertAdjacentHTML('afterbegin', '<div class="remove-image"></div>');
+            this.selectors[i].querySelector('label').insertAdjacentHTML('afterbegin', '<span class="title">Image</span><span class="button">Select image</span><span class="image"></span>');
+            this.selectors[i].insertAdjacentHTML('beforeend', '<div class="error"></div>');
+            let $dropArea = this.selectors[i].querySelector('.button');
             $dropArea.addEventListener('drop', FileLoader.prototype.drop.bind($dropArea));
             $dropArea.addEventListener('dragover', FileLoader.prototype.dragover.bind($dropArea));
             $dropArea.addEventListener('dragleave', FileLoader.prototype.dragleave.bind($dropArea));
@@ -38,11 +19,31 @@ FileLoader.prototype.init = function () {
     }
 }
 
+FileLoader.prototype.isValidFileSize = function (fileSize, $el) {
+    const size = 1024 * 1024 * 1;
+    if (size < fileSize) {
+        $el.querySelector('.error').innerText = 'Make sure your total file size for upload is not over 1MB.'
+        return false;
+    }
+    $el.querySelector('.error').innerText = '';
+    return true;
+}
+
+FileLoader.prototype.isValidMimetype = function (ext, $el) {
+    const mimetypes = ['image/jpeg', 'image/png', 'image/gif', 'image/pjpeg', 'image/svg+xml', 'image/webp', 'image/tiff'];
+    if (!mimetypes.includes(ext)) {
+        $el.querySelector('.error').innerText = 'You tried to upload not supported format. Available formats: jpg, png, jpeg, gif, svg, webp. Bad format.!'
+        return false;
+    }
+    $el.querySelector('.error').innerText = '';
+    return true;
+}
+
 FileLoader.prototype.drop = function (e) {
     e.preventDefault();
     let file = e.dataTransfer.files[0];
     this.style.borderColor = '#ced4da';
-    if (FileLoader.prototype.isValidFileSize(file.size, this.closest('.file-uploader'))) {
+    if (!FileLoader.prototype.isValidFileSize(file.size, this.closest('.file-uploader'))) {
         return false;
     }
     if (!FileLoader.prototype.isValidMimetype(file.type, this.closest('.file-uploader'))) {
@@ -70,7 +71,7 @@ FileLoader.prototype.dragleave = function (e) {
 FileLoader.prototype.removeImage = function () {
     for (let i in this.selectors) {
         if (this.selectors.hasOwnProperty(i)) {
-            let $wrap = this.selectors[i].closest('.file-uploader');
+            let $wrap = this.selectors[i];
             let $removeButton = $wrap.querySelector('.remove-image');
             $removeButton.addEventListener('click', function () {
                 $wrap.querySelector('.error').innerText = '';
@@ -85,8 +86,8 @@ FileLoader.prototype.removeImage = function () {
 FileLoader.prototype.uploadImage = function () {
     for (let i in this.selectors) {
         if (this.selectors.hasOwnProperty(i)) {
-            let $button = this.selectors[i];
-            let $wrap = $button.closest('.file-uploader');
+            let $wrap = this.selectors[i];
+            let $button = $wrap.querySelector('.button');
             let $image = $wrap.querySelector('.image');
             let $input = $wrap.querySelector('input');
             $input.addEventListener('change', function () {
@@ -109,5 +110,5 @@ FileLoader.prototype.uploadImage = function () {
 }
 
 new FileLoader({
-    selectors: '.file-uploader .button'
+    selectors: '.file-uploader'
 });
