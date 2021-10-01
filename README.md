@@ -2,7 +2,7 @@
 
 Init modal
 ```
-new Modal({
-    selectors: '.open-modal',
+new FileLoader({
+    selectors: '.file-uploader'
 });
 ```
